@@ -341,6 +341,21 @@ impl IgnitionKey {
     pub fn update_metadata(&mut self, metadata: IgnitionKeyMetadata) {
         self.metadata = metadata;
     }
+    
+    /// Get key fingerprint derived from wrapped key material
+    pub fn fingerprint(&self) -> AgeResult<KeyFingerprint> {
+        // Generate fingerprint from the encrypted key material
+        use sha2::{Sha256, Digest};
+        let mut hasher = Sha256::new();
+        hasher.update(&self.wrapped_key.ciphertext);
+        hasher.update(&self.key_type.to_string().as_bytes());
+        hasher.update(&self.creation_timestamp.timestamp().to_be_bytes());
+        
+        let hash = hasher.finalize();
+        
+        // Use the existing from_key_material method
+        KeyFingerprint::from_key_material(&hash[..16])
+    }
 }
 
 /// Validate passphrase strength according to security requirements
