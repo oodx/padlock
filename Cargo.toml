@@ -24,6 +24,7 @@ thiserror = "1.0"
 
 # Authority chain dependencies
 sha2 = "0.10"
+hex = "0.4"
 
 # RSB framework with re-exported dependencies (optional for now)
 # rsb = { git = "https://github.com/oodx/rsb-framework", branch = "main" }
