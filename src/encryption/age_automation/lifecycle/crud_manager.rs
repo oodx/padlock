@@ -16,7 +16,6 @@ use super::super::adapter::AgeAdapter;
 use super::super::tty_automation::TtyAutomator;
 use super::super::security::AuditLogger;
 use super::super::operations::{
-    Operation, FileEncryption, RepositoryOperations, 
     RepositoryStatus, OperationResult
 };
 
@@ -675,7 +674,8 @@ impl CrudManager {
 
 #[cfg(test)]
 mod tests {
-    use super::super::*;
+    use super::*;
+    use super::super::config::OutputFormat;
     use tempfile::TempDir;
 
     #[test]

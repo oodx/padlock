@@ -118,6 +118,7 @@ impl AgeAdapter for ShellAdapter {
 }
 
 /// Future Rage crate adapter (not yet implemented)
+#[derive(Debug)]
 #[allow(dead_code)]
 pub struct RageAdapter {
     // Future: rage crate integration

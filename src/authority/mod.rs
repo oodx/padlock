@@ -16,10 +16,7 @@ pub mod bridge;
 pub use chain::{KeyType, AuthorityChain, AuthorityKey, KeyFingerprint};
 pub use ignition::{IgnitionKey, PassphraseHash};
 pub use validation::{AuthorityProof, SubjectProof, AuthorityLevel};
-pub use operations::{
-    AuthorityKeyGenerator, KeyGeneratorFactory, KeyGenerationParams, 
-    GenerationMetadata, KeyGenerationResult,
-};
+pub use operations::{AuthorityAgeKeyGenerator, GeneratedAgeKey, AuthorityAgeEncryption, EncryptionParams, EncryptionResult};
 
 use crate::encryption::age_automation::error::{AgeError, AgeResult};
 
