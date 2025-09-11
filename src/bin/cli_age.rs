@@ -31,9 +31,9 @@ struct Cli {
     #[arg(long)]
     audit_log: Option<PathBuf>,
     
-    /// Use ASCII armor format
-    #[arg(short, long)]
-    armor: bool,
+    /// Output format for encrypted files
+    #[arg(long, default_value = "binary")]
+    format: OutputFormatArg,
     
     #[command(subcommand)]
     command: Commands,

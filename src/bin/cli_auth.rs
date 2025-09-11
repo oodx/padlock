@@ -157,6 +157,10 @@ enum Commands {
         /// Show authority relationships
         #[arg(long)]
         show_authorities: bool,
+        
+        /// Chain name to look for (matches generate --name)
+        #[arg(short, long, default_value = "auth")]
+        name: String,
     },
     
     /// Test complete end-to-end workflow
@@ -273,8 +277,8 @@ impl CliAuth {
             Commands::Validate { test_all, test_pair, detailed } => {
                 self.handle_validate(test_all, test_pair, detailed)
             }
-            Commands::Status { show_chain, show_keys, show_authorities } => {
-                self.handle_status(show_chain, show_keys, show_authorities)
+            Commands::Status { show_chain, show_keys, show_authorities, name } => {
+                self.handle_status(show_chain, show_keys, show_authorities, name)
             }
             Commands::Test { full_workflow, test_level, benchmark } => {
                 self.handle_test(full_workflow, test_level, benchmark)
@@ -429,7 +433,7 @@ impl CliAuth {
         Ok(())
     }
     
-    fn handle_status(&self, show_chain: bool, show_keys: bool, show_authorities: bool) -> Result<(), Box<dyn std::error::Error>> {
+    fn handle_status(&self, show_chain: bool, show_keys: bool, show_authorities: bool, name: String) -> Result<(), Box<dyn std::error::Error>> {
         println!("📊 Authority Chain Status");
         println!("=========================");
         
@@ -443,10 +447,11 @@ impl CliAuth {
         
         if show_keys {
             println!("\n🔑 Authority Keys:");
-            // Check for key files in directory
+            println!("   🏷️  Chain Name: {}", name);
+            // Check for key files using generate pattern: {name}-{type}.key
             let key_types = ["skull", "master", "repo", "ignition", "distro"];
             for key_type in &key_types {
-                let key_file = self.keys_dir.join(format!("{}_key.age", key_type));
+                let key_file = self.keys_dir.join(format!("{}-{}.key", name, key_type));
                 if key_file.exists() {
                     println!("   ✅ {} Authority Key: {}", key_type.to_uppercase(), key_file.display());
                 } else {
