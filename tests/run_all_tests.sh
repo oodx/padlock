@@ -79,6 +79,22 @@ run_rust_tests() {
 
 # Run CLI functionality tests
 run_cli_tests() {
+    log_test_start "CLI Age Direct Module Tests"
+    
+    if ./tests/cli/test_cli_age_direct.sh > /dev/null 2>&1; then
+        log_test_pass "CLI Age Direct Module Tests"
+    else
+        log_test_fail "CLI Age Direct Module Tests"
+    fi
+    
+    log_test_start "CLI Auth Direct Module Tests"
+    
+    if ./tests/cli/test_cli_auth_direct.sh > /dev/null 2>&1; then
+        log_test_pass "CLI Auth Direct Module Tests"
+    else
+        log_test_fail "CLI Auth Direct Module Tests"
+    fi
+    
     log_test_start "CLI Comprehensive Tests"
     
     if ./tests/cli/test_cli_comprehensive.sh > /dev/null 2>&1; then
