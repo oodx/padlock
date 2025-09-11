@@ -169,6 +169,22 @@ enum Commands {
     Demo,
 }
 
+/// Output format for CLI argument parsing
+#[derive(Clone, Debug, clap::ValueEnum)]
+enum OutputFormatArg {
+    Binary,
+    Ascii,
+}
+
+impl From<OutputFormatArg> for OutputFormat {
+    fn from(format: OutputFormatArg) -> Self {
+        match format {
+            OutputFormatArg::Binary => OutputFormat::Binary,
+            OutputFormatArg::Ascii => OutputFormat::AsciiArmor,
+        }
+    }
+}
+
 /// Main dispatcher coordinating all lifecycle operations
 struct LifecycleDispatcher {
     crud_manager: CrudManager,
@@ -187,8 +203,7 @@ impl LifecycleDispatcher {
     }
 
     /// Execute the specified command
-    fn execute_command(&mut self, command: Commands, armor: bool) -> Result<(), Box<dyn std::error::Error>> {
-        let format = if armor { OutputFormat::AsciiArmor } else { OutputFormat::Binary };
+    fn execute_command(&mut self, command: Commands, format: OutputFormat) -> Result<(), Box<dyn std::error::Error>> {
         
         match command {
             Commands::Lock { paths, passphrase, recursive, pattern, backup } => {
@@ -548,7 +563,7 @@ fn main() {
     // Create dispatcher
     match LifecycleDispatcher::new(cli.audit_log, cli.verbose) {
         Ok(mut dispatcher) => {
-            if let Err(e) = dispatcher.execute_command(cli.command, cli.armor) {
+            if let Err(e) = dispatcher.execute_command(cli.command, cli.format.into()) {
                 eprintln!("❌ Operation failed: {}", e);
                 process::exit(1);
             }
