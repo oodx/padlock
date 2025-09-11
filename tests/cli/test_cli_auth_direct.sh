@@ -79,9 +79,9 @@ test_basic_functionality() {
 test_key_generation_interface() {
     print_test "Testing CLI_AUTH key generation interface..."
     
-    # Test generate command interface
+    # Test generate command interface with timeout
     local gen_output
-    if gen_output=$(./target/debug/cli_auth --keys-dir "$KEYS_DIR" generate --passphrase "$PASSPHRASE" 2>&1); then
+    if gen_output=$(timeout 5s ./target/debug/cli_auth --keys-dir "$KEYS_DIR" generate --passphrase "$PASSPHRASE" 2>&1); then
         print_success "Key generation interface executed successfully"
         
         # Check if keys directory structure was created/attempted
@@ -95,13 +95,20 @@ test_key_generation_interface() {
         fi
         
     else
-        # Check if it's a proper dependency error (not CLI parsing error)
-        if echo "$gen_output" | grep -q -i "age\|crypto\|generation\|authority"; then
-            print_success "Key generation interface working (dependencies expected)"
-        else
-            print_error "Key generation interface has CLI parsing issues"
-            echo "Output: $gen_output"
+        local exit_code=$?
+        if [[ $exit_code -eq 124 ]]; then
+            print_error "Key generation timed out (5s) - TTY automation may be hanging"
+            echo "This suggests Age TTY subversion pattern needs timeout fixes"
             return 1
+        else
+            # Check if it's a proper dependency error (not CLI parsing error)
+            if echo "$gen_output" | grep -q -i "age\|crypto\|generation\|authority"; then
+                print_success "Key generation interface working (dependencies expected)"
+            else
+                print_error "Key generation interface has CLI parsing issues"
+                echo "Output: $gen_output"
+                return 1
+            fi
         fi
     fi
 }
@@ -155,16 +162,23 @@ test_encrypt_interface() {
     print_test "Testing CLI_AUTH authority-based encrypt interface..."
     
     local encrypt_output
-    if encrypt_output=$(./target/debug/cli_auth --keys-dir "$KEYS_DIR" encrypt --repo-key nonexistent.key "$TEST_DIR/secret1.txt" 2>&1); then
+    if encrypt_output=$(timeout 5s ./target/debug/cli_auth --keys-dir "$KEYS_DIR" encrypt --repo-key nonexistent.key "$TEST_DIR/secret1.txt" 2>&1); then
         print_success "Authority encrypt interface executed"
     else
-        # Check if it's proper authority/key related error
-        if echo "$encrypt_output" | grep -q -i "key\|authority\|not found\|repo"; then
-            print_success "Authority encrypt interface working (key dependency expected)"
-        else
-            print_error "Authority encrypt interface has parsing issues"
-            echo "Output: $encrypt_output"
+        local exit_code=$?
+        if [[ $exit_code -eq 124 ]]; then
+            print_error "Authority encrypt timed out (5s) - TTY automation may be hanging"
+            echo "This suggests Age TTY subversion pattern needs timeout fixes"
             return 1
+        else
+            # Check if it's proper authority/key related error
+            if echo "$encrypt_output" | grep -q -i "key\|authority\|not found\|repo"; then
+                print_success "Authority encrypt interface working (key dependency expected)"
+            else
+                print_error "Authority encrypt interface has parsing issues"
+                echo "Output: $encrypt_output"
+                return 1
+            fi
         fi
     fi
 }
@@ -174,16 +188,23 @@ test_decrypt_interface() {
     print_test "Testing CLI_AUTH authority-based decrypt interface..."
     
     local decrypt_output
-    if decrypt_output=$(./target/debug/cli_auth --keys-dir "$KEYS_DIR" decrypt --repo-key nonexistent.key "$TEST_DIR/secret1.txt" 2>&1); then
+    if decrypt_output=$(timeout 5s ./target/debug/cli_auth --keys-dir "$KEYS_DIR" decrypt --repo-key nonexistent.key "$TEST_DIR/secret1.txt" 2>&1); then
         print_success "Authority decrypt interface executed"
     else
-        # Check if it's proper authority/key related error
-        if echo "$decrypt_output" | grep -q -i "key\|authority\|not found\|repo\|encrypted"; then
-            print_success "Authority decrypt interface working (key dependency expected)"
-        else
-            print_error "Authority decrypt interface has parsing issues"
-            echo "Output: $decrypt_output"
+        local exit_code=$?
+        if [[ $exit_code -eq 124 ]]; then
+            print_error "Authority decrypt timed out (5s) - TTY automation may be hanging"
+            echo "This suggests Age TTY subversion pattern needs timeout fixes"
             return 1
+        else
+            # Check if it's proper authority/key related error
+            if echo "$decrypt_output" | grep -q -i "key\|authority\|not found\|repo\|encrypted"; then
+                print_success "Authority decrypt interface working (key dependency expected)"
+            else
+                print_error "Authority decrypt interface has parsing issues"
+                echo "Output: $decrypt_output"
+                return 1
+            fi
         fi
     fi
 }

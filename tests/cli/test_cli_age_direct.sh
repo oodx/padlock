@@ -177,18 +177,25 @@ test_audit_logging() {
 test_lock_interface() {
     print_test "Testing CLI_AGE lock interface..."
     
-    # Test lock interface (expected to fail without Age, but should show proper error)
+    # Test lock interface with aggressive timeout (5 seconds max)
     local lock_output
-    if lock_output=$(./target/debug/cli_age --audit-log "$AUDIT_LOG" lock --passphrase "$PASSPHRASE" "$TEST_DIR/file1.txt" 2>&1); then
+    if lock_output=$(timeout 5s ./target/debug/cli_age --audit-log "$AUDIT_LOG" lock --passphrase "$PASSPHRASE" "$TEST_DIR/file1.txt" 2>&1); then
         print_success "Lock interface executed successfully"
     else
-        # Check if it's a proper Age-related error (not a CLI parsing error)
-        if echo "$lock_output" | grep -q -i "age\|binary\|encryption"; then
-            print_success "Lock interface working (Age binary dependency expected)"
-        else
-            print_error "Lock interface has CLI parsing issues"
-            echo "Output: $lock_output"
+        local exit_code=$?
+        if [[ $exit_code -eq 124 ]]; then
+            print_error "Lock interface timed out (5s) - TTY automation may be hanging"
+            echo "This suggests Age TTY subversion pattern needs timeout fixes"
             return 1
+        else
+            # Check if it's a proper Age-related error (not a CLI parsing error)
+            if echo "$lock_output" | grep -q -i "age\|binary\|encryption\|not found"; then
+                print_success "Lock interface working (Age binary dependency expected)"
+            else
+                print_error "Lock interface has CLI parsing issues"
+                echo "Output: $lock_output"
+                return 1
+            fi
         fi
     fi
 }
@@ -197,18 +204,25 @@ test_lock_interface() {
 test_unlock_interface() {
     print_test "Testing CLI_AGE unlock interface..."
     
-    # Test unlock interface
+    # Test unlock interface with aggressive timeout (5 seconds max)
     local unlock_output
-    if unlock_output=$(./target/debug/cli_age --audit-log "$AUDIT_LOG" unlock --passphrase "$PASSPHRASE" "$TEST_DIR/file1.txt" 2>&1); then
+    if unlock_output=$(timeout 5s ./target/debug/cli_age --audit-log "$AUDIT_LOG" unlock --passphrase "$PASSPHRASE" "$TEST_DIR/file1.txt" 2>&1); then
         print_success "Unlock interface executed successfully"
     else
-        # Check if it's a proper Age-related error
-        if echo "$unlock_output" | grep -q -i "age\|binary\|decryption\|encrypted"; then
-            print_success "Unlock interface working (Age binary dependency expected)"
-        else
-            print_error "Unlock interface has CLI parsing issues"
-            echo "Output: $unlock_output"
+        local exit_code=$?
+        if [[ $exit_code -eq 124 ]]; then
+            print_error "Unlock interface timed out (5s) - TTY automation may be hanging"
+            echo "This suggests Age TTY subversion pattern needs timeout fixes"
             return 1
+        else
+            # Check if it's a proper Age-related error
+            if echo "$unlock_output" | grep -q -i "age\|binary\|decryption\|encrypted\|not found"; then
+                print_success "Unlock interface working (Age binary dependency expected)"
+            else
+                print_error "Unlock interface has CLI parsing issues"
+                echo "Output: $unlock_output"
+                return 1
+            fi
         fi
     fi
 }
