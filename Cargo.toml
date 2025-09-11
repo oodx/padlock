@@ -8,8 +8,12 @@ name = "padlock"
 path = "src/main.rs"
 
 [[bin]]
-name = "driver"
-path = "src/driver.rs"
+name = "cli_age"
+path = "src/bin/cli_age.rs"
+
+[[bin]]
+name = "cli_auth"
+path = "src/bin/cli_auth.rs"
 
 
 [dependencies]

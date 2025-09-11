@@ -1,10 +1,10 @@
-//! Padlock Age Automation Lifecycle Dispatcher
+//! Age Automation Direct CLI Interface
 //!
-//! This CLI dispatcher provides comprehensive lifecycle management for Age encryption operations,
-//! demonstrating complete CRUD capabilities and serving as both validation tool and integration
-//! blueprint for the main padlock system.
+//! This CLI provides direct access to the Age automation module system for testing and debugging.
+//! Users can directly interface with Age encryption operations, TTY automation, and lifecycle
+//! management without going through the main padlock orchestrator.
 //!
-//! Security Guardian: Edgar - Production lifecycle CLI dispatcher
+//! Security Guardian: Edgar - Direct Age automation interface
 
 use std::path::{Path, PathBuf};
 use std::process;
@@ -16,11 +16,11 @@ use padlock::encryption::age_automation::{
     AgeConfig, OutputFormat, AdapterFactory
 };
 
-/// Padlock Age Automation Lifecycle Dispatcher
+/// Age Automation Direct CLI Interface
 #[derive(Parser)]
-#[command(name = "driver")]
-#[command(about = "Age Automation Lifecycle Dispatcher - Complete CRUD validation")]
-#[command(version = "0.0.1-lifecycle")]
+#[command(name = "cli_age")]
+#[command(about = "Direct interface to Age automation module system")]
+#[command(version = "0.0.1-age-cli")]
 #[command(author = "Edgar (Security Guardian)")]
 struct Cli {
     /// Enable verbose output
