@@ -1,6 +1,6 @@
 [package]
 name = "padlock"
-version = "0.0.2"
+version = "0.0.3"
 edition = "2021"
 
 [[bin]]
@@ -16,8 +16,8 @@ name = "cli_auth"
 path = "src/bin/cli_auth.rs"
 
 [[bin]]
-name = "driver"
-path = "driver.rs"
+name = "age_driver"
+path = "src/age_driver.rs"
 
 
 [dependencies]
