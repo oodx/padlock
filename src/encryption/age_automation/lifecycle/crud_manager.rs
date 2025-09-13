@@ -89,7 +89,6 @@ pub struct EmergencyResult {
 /// Central CRUD manager coordinating all Age automation lifecycle operations
 pub struct CrudManager {
     adapter: Box<dyn AgeAdapter>,
-    tty_automator: TtyAutomator,
     audit_logger: AuditLogger,
     config: AgeConfig,
     operation_history: Vec<OperationRecord>,
@@ -111,12 +110,10 @@ impl CrudManager {
         adapter: Box<dyn AgeAdapter>,
         config: AgeConfig,
     ) -> AgeResult<Self> {
-        let tty_automator = TtyAutomator::new()?;
         let audit_logger = AuditLogger::new(config.audit_log_path.clone().map(PathBuf::from))?;
-        
+
         Ok(Self {
             adapter,
-            tty_automator,
             audit_logger,
             config,
             operation_history: Vec::new(),
@@ -484,7 +481,7 @@ impl CrudManager {
             file.with_extension("age")
         };
 
-        match self.tty_automator.encrypt(file, &output_path, passphrase, options.format) {
+        match self.adapter.encrypt(file, &output_path, passphrase, options.format) {
             Ok(_) => {
                 result.add_success(file.display().to_string());
                 Ok(())
@@ -515,7 +512,7 @@ impl CrudManager {
         // Determine output path by removing .age extension
         let output_path = file.with_extension("");
 
-        match self.tty_automator.decrypt(file, &output_path, passphrase) {
+        match self.adapter.decrypt(file, &output_path, passphrase) {
             Ok(_) => {
                 result.add_success(file.display().to_string());
                 Ok(())

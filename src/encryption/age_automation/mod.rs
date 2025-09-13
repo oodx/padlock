@@ -38,6 +38,7 @@
 pub mod adapter;
 pub mod age_engine;
 pub mod tty_automation;
+pub mod pty_wrap;  // New PTY automation module
 pub mod operations;
 pub mod lifecycle;
 pub mod security;

@@ -1,7 +1,7 @@
 //! Age Adapter Pattern - Clean abstraction for Age implementations
 //!
 //! This module provides adapter pattern for different Age backends:
-//! - ShellAdapter: Uses proven shell automation (current implementation)
+//! - ShellAdapter: Uses reliable PTY automation (current implementation)
 //! - RageAdapter: Future integration with rage crate (planned)
 //!
 //! Security Guardian: Edgar - Adapter pattern for clean backend abstraction
@@ -31,87 +31,84 @@ pub trait AgeAdapter {
     fn clone_box(&self) -> Box<dyn AgeAdapter>;
 }
 
-/// Shell-based Age adapter using proven TTY automation methods
+/// Shell-based Age adapter using PTY automation methods
 pub struct ShellAdapter {
-    shell_automator: super::tty_automation::TtyAutomator,
+    pty_automator: super::pty_wrap::PtyAgeAutomator,
     audit_logger: super::security::AuditLogger,
 }
 
 impl ShellAdapter {
-    /// Create new ShellAdapter with TTY automation
+    /// Create new ShellAdapter with PTY automation
     pub fn new() -> AgeResult<Self> {
-        let shell_automator = super::tty_automation::TtyAutomator::new()?;
+        let pty_automator = super::pty_wrap::PtyAgeAutomator::new()?;
         let audit_logger = super::security::AuditLogger::new(None)?;
-        
+
         Ok(Self {
-            shell_automator,
+            pty_automator,
             audit_logger,
         })
     }
     
-    /// Validate shell dependencies (age binary, script/expect)
+    /// Validate PTY dependencies (age binary)
     pub fn validate_dependencies(&self) -> AgeResult<()> {
-        self.shell_automator.validate_dependencies()
+        self.pty_automator.validate_dependencies()
     }
-    
-    /// Get available TTY methods on this system
+
+    /// Get available automation methods on this system
     pub fn available_methods(&self) -> Vec<String> {
-        self.shell_automator.available_methods()
+        self.pty_automator.available_methods()
     }
 }
 
 impl AgeAdapter for ShellAdapter {
     fn encrypt(&self, input: &Path, output: &Path, passphrase: &str, format: OutputFormat) -> AgeResult<()> {
         self.audit_logger.log_operation_start("encrypt", input, output)?;
-        
-        let result = self.shell_automator.encrypt(input, output, passphrase, format);
-        
+
+        let result = self.pty_automator.encrypt(input, output, passphrase, format);
+
         match &result {
             Ok(_) => self.audit_logger.log_operation_success("encrypt", input, output)?,
             Err(e) => self.audit_logger.log_operation_failure("encrypt", input, output, e)?,
         }
-        
+
         result
     }
     
     fn decrypt(&self, input: &Path, output: &Path, passphrase: &str) -> AgeResult<()> {
         self.audit_logger.log_operation_start("decrypt", input, output)?;
-        
-        let result = self.shell_automator.decrypt(input, output, passphrase);
-        
+
+        let result = self.pty_automator.decrypt(input, output, passphrase);
+
         match &result {
             Ok(_) => self.audit_logger.log_operation_success("decrypt", input, output)?,
             Err(e) => self.audit_logger.log_operation_failure("decrypt", input, output, e)?,
         }
-        
+
         result
     }
     
     fn health_check(&self) -> AgeResult<()> {
         // Check Age binary availability
-        self.shell_automator.check_age_binary()?;
-        
-        // Check TTY automation methods
-        self.shell_automator.check_automation_methods()?;
-        
-        // Perform full encrypt/decrypt cycle test
-        self.shell_automator.perform_health_check()?;
-        
+        self.pty_automator.check_age_binary()?;
+
+        // Perform full encrypt/decrypt cycle test with PTY
+        self.pty_automator.perform_health_check()?;
+
         self.audit_logger.log_health_check("passed")?;
         Ok(())
     }
     
     fn adapter_name(&self) -> &'static str {
-        "ShellAdapter"
+        "PtyAdapter"
     }
-    
+
     fn adapter_version(&self) -> String {
-        format!("shell-v{}-tty-proven", super::VERSION)
+        format!("pty-v{}-portable-pty", super::VERSION)
     }
     
     fn clone_box(&self) -> Box<dyn AgeAdapter> {
         Box::new(ShellAdapter {
-            shell_automator: super::tty_automation::TtyAutomator::new().unwrap(),
+            pty_automator: super::pty_wrap::PtyAgeAutomator::new().unwrap(),
             audit_logger: super::security::AuditLogger::new(None).unwrap(),
         })
     }
